@@ -1,0 +1,41 @@
+<div class="container full-screen v-center h-center">
+  <div>
+    <h1>Sprint planner</h1>
+
+    <div class="greeting">
+      <h2>Hello: </h2>
+      <input
+      [ngModel]="name()" 
+      (input)="updateName($event)"
+      class="sp-input"
+      type="text"
+      placeholder="Name"
+      (keyup.enter)="createRoom()">
+
+      
+    </div>
+  </div>
+  <div class="container h-center">
+    <div class="landing-page-row">
+      <button class="sp-btn" (click)="joinRoom()">Join Room</button>
+      <input 
+        [ngModel]="roomId()"
+        (input)="updateRoom($event)"
+        class="sp-input"
+        type="text"
+        placeholder="Room ID"
+        (keyup.enter)="joinRoom()">
+    </div>
+  
+    <div class="landing-page-row">
+      <p>
+        Or
+      </p>
+    </div>
+
+    <div class="landing-page-row">
+      <button (click)="createRoom()" class="sp-btn">Create Room</button>
+    </div>
+    
+  </div>
+</div>

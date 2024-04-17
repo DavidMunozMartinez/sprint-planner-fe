@@ -1,0 +1,135 @@
+:host {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  pointer-events: none;
+}
+.toaster-container {
+  display: flex;
+  position: absolute;
+  padding: 8px 16px;
+  transform-origin: center;
+  width: max-content;
+
+  animation-duration: 197ms;
+  animation-iteration-count: 1;
+  animation-timing-function: cubic-bezier(.62,.4,.39,1.27);
+  
+  &.left {
+    left:  -8px;
+    top: 50%;
+    animation-name: appear-left;
+    transform: 
+      translateX(-100%)
+      translateY(-50%);
+  }
+  &.top {
+    top: -8px;
+    left: 50%;
+    animation-name: appear-top;
+    transform: 
+      translateY(-100%)
+      translateX(-50%);
+  }
+  &.right {
+    right: -8px;
+    top: 50%;
+    animation-name: appear-right;
+    transform:
+      translateX(100%)
+      translateY(-50%);
+  }
+  &.bottom {
+    bottom: -8px;
+    left: 50%;
+    animation-name: appear-bottom;
+    transform:
+      translateY(100%)
+      translateX(-50%);
+  }
+  &.fade-out {
+    animation-name: out;
+    animation-duration: 297ms;
+    animation-iteration-count: 1;
+    animation-timing-function: cubic-bezier(.62,.4,.39,1.27);
+    animation-fill-mode: forwards;
+  } 
+}
+
+@keyframes appear-left {
+  0% {
+    opacity: 0;
+    transform:
+      translateX(-100%)
+      translateY(-50%)
+      scale(0.5)
+  }
+  100% {
+    opacity: 1;
+    transform:
+      translateX(-100%)
+      translateY(-50%)
+      scale(1);
+  }
+}
+
+@keyframes appear-top {
+  0% {
+    opacity: 0;
+    transform: 
+      translateY(-100%)
+      translateX(-50%)
+      scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: 
+      translateY(-100%)
+      translateX(-50%)
+      scale(1);
+  }
+}
+
+@keyframes appear-right {
+  0% {
+    opacity: 0;
+    transform: 
+      translateX(100%)
+      translateY(-50%)
+      scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: 
+      translateX(100%)
+      translateY(-50%)
+      scale(1);
+  }
+}
+
+@keyframes appear-bottom {
+  0% {
+    opacity: 0;
+    transform:
+      translateY(100%)
+      translateX(-50%)
+      scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform:
+      translateY(100%)
+      translateX(-50%)
+      scale(1);
+  }
+}
+
+@keyframes out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

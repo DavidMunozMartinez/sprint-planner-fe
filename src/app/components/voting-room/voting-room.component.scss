@@ -1,0 +1,30 @@
+.voting-room {
+}
+
+.host {
+  .name {
+    font-weight: bold;
+  }
+}
+
+.voter-card {
+  border-radius: 4px;
+  border: 2px solid #bebebe;
+  height: 50px;
+  width: 100px;
+  margin: 4px;
+  flex-direction: column;
+  transition: 
+    height 200ms ease-in-out,
+    background-color 200ms ease-in-out
+    ;
+}
+.voted {
+  background-color: var(--primary);
+  color: var(--background);
+  border: 2px solid var(--primary);
+}
+
+.show-vote {
+  height: 65px;
+}

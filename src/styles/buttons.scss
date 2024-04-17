@@ -1,0 +1,42 @@
+.sp-btn {
+  border-radius: 4px;
+  background: var(--primary);
+  padding: 8px 16px;
+  margin: 4px;
+  color: white;
+  transition: background-color 120ms ease-in-out;
+  cursor: pointer;
+}
+.sp-btn:focus {
+  background: var(--primary-tint);
+}
+.sp-btn:hover {
+  background: var(--primary-dark);
+}
+.sp-btn:active {
+  box-shadow: 0px 0px 0px 2px var(--primary-tint);
+}
+
+.sp-btn.secondary {
+  border-radius: 4px;
+  background: var(--backgroun);
+  // border:2px solid var(--primary);
+  // box-shadow: ;
+  box-shadow: 0px 0px 0px 2px var(--primary);
+
+  // border-style: inset;
+  padding: 8px 16px;
+  margin: 4px;
+  color: var(--primary);
+  transition: background-color 120ms ease-in-out;
+  cursor: pointer;
+}
+.sp-btn.secondary:focus {
+  box-shadow: 0px 0px 0px 2px var(--primary-dark);
+}
+.sp-btn.secondary:hover {
+  box-shadow: 0px 0px 0px 2px var(--primary-tint);
+}
+.sp-btn.secondary:active {
+  background: var(--primary-tint);
+}

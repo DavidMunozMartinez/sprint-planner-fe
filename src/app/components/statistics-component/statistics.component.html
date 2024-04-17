@@ -1,0 +1,29 @@
+<div class="container">
+  @if(average() > 0) {
+    <div class="container average">
+      <h2>Average</h2>
+      <h1>{{average()}}</h1>
+    </div>
+    <div class="container frequencies">
+      <h2>Frequencies</h2>
+      <div class="frequencies-container">
+        @for (frequency of frequencies() | keyvalue:sort; track $index) {
+          <div class="frequency container">
+            @if(frequency) {
+              <h2 class="sp-btn secondary">
+                {{ frequency.key }}
+              </h2>
+              @for(name of frequency.value; track name) {
+                <div class="name">
+                  {{ name }}
+                </div>
+              }
+            }
+            <div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

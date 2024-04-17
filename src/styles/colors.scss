@@ -1,0 +1,47 @@
+// Light
+$light-primary: rgb(23, 160, 168);
+$light-primary-tint: rgb(41, 181, 188);
+$light-primary-dark: rgb(8, 137, 144);
+$light-background: rgb(230, 230, 230);
+
+
+// Dark
+$dark-primary: rgb(23, 160, 168);
+$dark-primary-tint: rgb(51, 193, 201);
+$dark-primary-dark: rgb(8, 137, 144);
+$dark-background: rgb(61, 61, 61);
+
+$themes: (
+  --text: (
+    rgb(61, 61, 61),
+    rgb(230, 230, 230)
+  ),
+  --primary: (
+    $light-primary,
+    $dark-primary,
+  ),
+  --primary-tint: (
+    $light-primary-tint,
+    $dark-primary-tint,
+  ),
+  --primary-dark: (
+    $light-primary-dark,
+    $dark-primary-dark,
+  ),
+  --background: (
+    $light-background,
+    $dark-background,
+  )
+);
+
+.light-theme {
+  @each $color, $themes in $themes {
+    #{$color}: nth($themes, 1);
+  }
+}
+
+.dark-theme {
+  @each $color, $themes in $themes {
+    #{$color}: nth($themes, 2);
+  }
+}

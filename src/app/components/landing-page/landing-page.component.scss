@@ -1,0 +1,19 @@
+.container {
+  flex-direction: column;
+}
+
+.greeting {
+  display: flex;
+  position: relative;
+}
+
+.landing-page-row {
+  display: flex;
+  flex-direction: row;
+  width: 380px;
+  align-items: center;
+  justify-content: center;
+  input, button {
+    flex: 1;
+  }
+}
