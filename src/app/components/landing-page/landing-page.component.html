@@ -50,6 +50,7 @@
         placeholder="Name"
         [ngModel]="name()" 
         (input)="updateName($event)"
+        (keyup.enter)="joinRoom()"
       >
       <button class="sp-btn" (click)="joinRoom()">Join!</button>
     </div>
