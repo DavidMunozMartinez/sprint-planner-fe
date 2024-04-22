@@ -11,8 +11,6 @@
       type="text"
       placeholder="Name"
       (keyup.enter)="createRoom()">
-
-      
     </div>
   </div>
   <div class="container h-center">
@@ -39,3 +37,21 @@
     
   </div>
 </div>
+
+@if (modal() === 'pick-name') {
+  <div class="full-screen-modal">
+    <h1 class="title">
+      Pick a name!
+    </h1>
+    <div class="content">
+      <input
+        type="text"
+        class="sp-input"
+        placeholder="Name"
+        [ngModel]="name()" 
+        (input)="updateName($event)"
+      >
+      <button class="sp-btn" (click)="joinRoom()">Join!</button>
+    </div>
+  </div>
+}

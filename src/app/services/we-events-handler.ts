@@ -1,5 +1,10 @@
-import { Injectable } from "@angular/core";
+import { Injectable, inject } from "@angular/core";
 import { ServerVoterData, Voter } from "../classes/voter";
+import { Store } from "@ngrx/store";
+import { AppState } from "../app-store/app.store";
+import { selectRoom } from "../app-store/app.selectors";
+import { Room } from "../classes/room";
+import { addVoter, setRoomRevealed, setVoterProp } from "../app-store/app.actions";
 
 export type VoterJoinedWSData = {
   voter: ServerVoterData
@@ -8,7 +13,7 @@ export type VoterJoinedWSData = {
 export type VoterUpdatedWSData = {
   voterId: string;
   property: keyof Voter;
-  value: string;
+  value: any;
 }
 
 export type VotesRevelatedWSData = {
@@ -21,19 +26,40 @@ export type WSMessage = VoterJoinedWSData & VoterUpdatedWSData & VotesRevelatedW
 })
 export class WSEventsHandler {
 
-  // private roomsService = inject(RoomsService);
+  private store = inject(Store<AppState>)
 
-  constructor() {}
+  private room$ = this.store.select(selectRoom);
+  private room: Room | null = null;
+  constructor() {
+    this.room$.subscribe((state) => {
+      this.room = state;
+    });
+  }
 
   voterJoined(data: VoterJoinedWSData) {
-    // this.roomsService.room?.addVoter(new Voter(data.voter))
+    if (!this.room) return;
+
+    const incommingVoter = data.voter;
+    const voter = new Voter(incommingVoter);
+    this.store.dispatch(addVoter({ voter }));
   }
 
   voterUpdated(data: VoterUpdatedWSData) {
-    // console.log(data.property, data.value);
+    this.store.dispatch(setVoterProp<VoterUpdatedWSData['property']>()({ id: data.voterId, property: data.property, value: data.value }))
   }
 
-  votesRevealed(data: VotesRevelatedWSData) {}
+  votesRevealed(data: VotesRevelatedWSData) {
+    this.store.dispatch(setRoomRevealed({ revealed: true }));
+    this.room?.voters.forEach((voter) => {
+      this.store.dispatch(setVoterProp<"vote">()({ id: voter.id, property: "vote", value: data.votes[voter.id] }))
+    });
+  }
 
-  votesReset() {}
+  votesReset() {
+    this.store.dispatch(setRoomRevealed({ revealed: false }));
+    this.room?.voters.forEach((voter) => {
+      this.store.dispatch(setVoterProp<"vote">()({ id: voter.id, property: "vote", value: -1 }))
+      this.store.dispatch(setVoterProp<"hasVoted">()({ id: voter.id, property: "hasVoted", value: false }))
+    });
+  }
 }

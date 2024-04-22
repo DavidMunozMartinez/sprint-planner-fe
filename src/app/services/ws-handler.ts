@@ -1,6 +1,7 @@
 import { Injectable, inject } from "@angular/core";
 import { WSEventsHandler, WSMessage } from "./we-events-handler";
 import { Router } from "@angular/router";
+import { SERVER } from "../constants";
 
 type WSEvent = {
   message: WSMessage;
@@ -14,10 +15,31 @@ type WSEvent = {
 })
 export class WSHandler {
 
+  ws: WebSocket | null = null;
+  connected = false;
+
   private router = inject(Router)
   private handler = inject(WSEventsHandler)
 
   private subscriptions: { [key in keyof WSEventsHandler]?: (typeof this.handler[keyof WSEventsHandler])[] } = {};
+
+  init(userId: string, roomId: string) {
+    this.ws = new WebSocket(
+      `${SERVER}/ws?room=${roomId}&id=${userId}`
+    );
+
+    this.ws.addEventListener('message', (event) => {
+      const data: WSEvent = JSON.parse(event.data);
+      this.dispatch(data);
+    });
+    this.ws.addEventListener('open', () => {
+      this.connected = true;
+    });
+    this.ws.addEventListener('close', () => {
+      this.connected = false;
+      console.log('Something went wrong with WebSockets')
+    });
+  }
   
   initListeners(ws: WebSocket) {
     if (!ws) return;

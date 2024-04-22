@@ -3,9 +3,10 @@ import { Component, DestroyRef, ElementRef, inject, input, output, signal } from
 import { FormsModule } from "@angular/forms";
 import { BrowserModule } from "@angular/platform-browser";
 
-type Toaster = {
+export type ToasterInputs = {
   text: string,
-  type: 'primary' | 'secondary'
+  type: 'primary' | 'secondary',
+  position: 'top' | 'left' | 'bottom' | 'right'
 }
 
 @Component({

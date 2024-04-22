@@ -1,10 +1,17 @@
-import { Component, WritableSignal, computed, inject, signal } from "@angular/core";
+import { Component, computed, inject, signal } from "@angular/core";
 import { RoomsService } from "../../services/rooms.service";
-import { Voter } from "../../classes/voter";
 import { WSHandler } from "../../services/ws-handler";
 import { firstValueFrom } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { StatisticsComponent } from "../statistics-component/statistics.component";
+import { Store } from "@ngrx/store";
+import { selectCachedRoomId, selectId, selectName, selectRoom } from "../../app-store/app.selectors";
+import { AppState } from "../../app-store/app.store";
+import { setVoterProp } from "../../app-store/app.actions";
+import { Router } from "@angular/router";
+import { ToasterInputs } from "../toaster/toaster.component";
+
+
 
 @Component({
   selector: 'voting-room',
@@ -15,116 +22,106 @@ import { StatisticsComponent } from "../statistics-component/statistics.componen
 })
 export class VotingRoomComponent {
 
-  name: string;
-  voters: WritableSignal<Voter[]> = signal([]);
-  roomId: string = ''
-  me: Voter | null = null;
+  private roomsService = inject(RoomsService);
+  private wsHandler = inject(WSHandler);
+  private http = inject(HttpClient);
+  private store = inject(Store<AppState>)
+  private router = inject(Router)
+  // private connected = false;
 
-  revealed = signal(false);
   options = [0.5, 1, 2, 3, 5, 8, 13, 21]
-  statisticsData = computed(() => this.voters().map((voter) => {
+  name = this.store.selectSignal(selectName);
+  room = this.store.selectSignal(selectRoom)
+  id = this.store.selectSignal(selectId)
+  modal = signal("")
+  me = computed(() => {
+    const me = this.room().voters.find((voter) => voter.id === this.id())
+    return me || null;
+  });
+
+  statisticsData = computed(() => this.room().voters.map((voter) => {
     return {
       name: voter.name || '',
       value: voter.vote
     }
   }));
 
-  private roomsService = inject(RoomsService);
-  private wsHandler = inject(WSHandler);
-  private http = inject(HttpClient);
+  toasters: ToasterInputs[] = []
+  
+  constructor() {}
 
-  constructor() {
-    this.name = this.roomsService.name;
+  async ngOnInit() {
+    const cachedRoomId = this.store.selectSignal(selectCachedRoomId)();
 
-    if (this.roomsService.room) {
-      this.voters.set(this.roomsService.room.voters);
-      this.me = this.voters().find((voter) => voter.id === this.roomsService.id) || null
-    } 
-
-    if (!this.roomsService.room && this.roomsService.roomId) {
-      this.roomsService.getRoomData(this.roomsService.roomId).then(() => {
-        this.revealed.set(Boolean(this.roomsService.room?.revealed));
-        this.voters.set(this.roomsService.room?.voters || []);
-        this.me = this.voters().find((voter) => voter.id === this.roomsService.id) || null
-      });
+    const id = this.id();
+    if (cachedRoomId && id && !this.wsHandler.connected) {
+      try {
+        await this.handleAutoJoin(cachedRoomId, id);
+      } catch (error) {
+        this.router.navigate(['/'])
+      }
     }
-    this.roomId = this.roomsService.roomId; 
-
-    this.wsHandler.on('voterJoined', (data) => {
-      const incommingVoter = data.voter;
-      const voters = this.voters();
-      const exists = voters.some((voter) => voter.id === incommingVoter.id)
-      if (!exists) {
-        voters.push(new Voter(incommingVoter));
-        this.voters.set(voters)
-      }
-    });
-
-    this.wsHandler.on('voterUpdated', (data) => {
-      const voters = this.voters();
-      const updatedVoter = voters.find((voter) => voter.id === data.voterId);
-      if (updatedVoter) {
-        updatedVoter[data.property] = data.value as never
-        this.voters.set(voters)
-      }
-    });
-
-    this.wsHandler.on('votesRevealed', (data) => {
-      const voters = this.voters();
-      const updatedVoters = voters.map((voter) => {
-        voter.vote = data.votes[voter.id]
-        return voter
-      });
-      this.voters.set(updatedVoters)
-      this.revealed.set(true);
-    });
-
-    this.wsHandler.on('votesReset', () => {
-      const voters = this.voters();
-      const updatedVoters = voters.map((voter) => {
-        voter.vote = -1;
-        voter.hasVoted = false;
-        return voter
-      });
-      this.voters.set(updatedVoters);
-      this.revealed.set(false);
-    });
   }
 
   updateMyVote(value: number) {
-    if (this.revealed()) return;
+    const room = this.room();
+    const me = this.me();
+    if (!me || room.revealed) return;
 
     firstValueFrom(
       this.http.post('http://localhost:3000/update-vote', JSON.stringify({
-        voterId: this.me?.id,
-        roomId: this.roomId,
+        voterId: me.id,
+        roomId: room.id,
         value,
     }))).then((data: any) => {
-      console.log(data);
-      if (!this.me) return;
-
-      if (this.me.vote === value) {
-        this.me.vote = -1;
-      } else {
-        this.me.vote = value;
-      }
+      this.store.dispatch(setVoterProp<"vote">()({ id: me.id, property: "vote", value }))
     });
   }
 
   revealVotes() {
+    const room = this.room();
     firstValueFrom(
       this.http.post('http://localhost:3000/reveal-votes', JSON.stringify({
-        roomId: this.roomId,
+        roomId: room.id,
     }))).then((data: any) => {
+      
     });
   }
 
   resetVotes() {
+    const room = this.room();
     firstValueFrom(
       this.http.post('http://localhost:3000/reset-votes', JSON.stringify({
-        roomId: this.roomId,
+        roomId: room.id,
     }))).then((data: any) => {
-      console.log(data);
     });
+  }
+
+  private async handleAutoJoin(cachedRoomId: string, id: string) {
+    const serverRoom = await this.roomsService.getRoomData(cachedRoomId);
+    this.roomsService.setServerRoomData(serverRoom);
+    const room = this.room();
+    const name = this.name();
+
+    if (!name) {
+      this.modal.set('pick-name')
+      return;
+    }
+
+    const me = room.voters.find(voter => voter.id === id);
+    if (!me) {
+      // If we are not in the cached room, join
+      await this.joinCachedRoom(room.id, id, name);
+    }
+    this.wsHandler.init(id, cachedRoomId);
+
+    return true;
+  }
+
+  async joinCachedRoom(roomId: string, id: string, name: string) {
+    const serverRoom = await this.roomsService.joinRoom(id, roomId, name);
+    this.roomsService.setServerRoomData(serverRoom);
+    // this.connected = true;
+    return true;
   }
 }

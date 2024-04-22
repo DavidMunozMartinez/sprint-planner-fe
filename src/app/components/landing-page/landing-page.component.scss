@@ -5,6 +5,10 @@
 .greeting {
   display: flex;
   position: relative;
+  input {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
 }
 
 .landing-page-row {

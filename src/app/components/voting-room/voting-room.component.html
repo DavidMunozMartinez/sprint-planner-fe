@@ -3,35 +3,35 @@
     <div>
       <h1>Voting Room</h1>
       <h3>
-        Id: {{ roomId }}
+        Id: {{ room().id }}
       </h3>
     </div>
   </div>
   
   <div class="container">
-    @for (voter of voters(); track $index) {
+    @for (voter of room().voters; track $index) {
       <div
         class="container v-center voter-card"
         [class.voted]="voter.hasVoted"
         [class.host]="voter.isHost"
-        [class.show-vote]="revealed">
+        [class.show-vote]="room().revealed">
         <div class="name">
-          {{voter.name}}{{ me?.id === voter.id ? '(You)' : '' }}
+          {{voter.name}}{{ me()?.id === voter.id ? '(You)' : '' }}
         </div>
-        <div class="vote-value">
-          @if (revealed()) {
+        @if (room().revealed) {
+            <div class="vote-value sp-btn secondary">
             @if (voter.vote > 0) {
               {{ voter.vote }}
             } @else {
               <img src="assets/no-vote.gif" height="35px" width="35px">
             }
+          </div>
           }
-        </div>
       </div>
     }
   </div>
   
-  @if(me) {
+  @if(me()) {
     <div class="container v-center">
       <div>
         <h2>Vote</h2>
@@ -39,7 +39,7 @@
       <div>
         @for (val of options; track $index) {
           <span>
-            <button (click)="updateMyVote(val)" class="sp-btn" [class.secondary]="me.vote !== val">
+            <button (click)="updateMyVote(val)" class="sp-btn" [class.secondary]="me()?.vote !== val">
               {{ val }}
             </button>
           </span>
@@ -47,14 +47,30 @@
       </div>
     </div>
   
-    @if(me.isHost) {
+    @if(me()?.isHost) {
       <div class="container">
         <button (click)="resetVotes()" class="sp-btn">New vote</button>
         <button (click)="revealVotes()" class="sp-btn">Reveal Votes</button>
       </div>
     }
   }
-  <statistics-component [data]="revealed() ? statisticsData() : []"/>
+  <statistics-component [data]="room().revealed ? statisticsData() : []"/>
 </div>
+
+@if (modal() === 'pick-name') {
+  <div class="full-screen-modal">
+    <h1 class="title">
+      Pick a name!
+    </h1>
+    <div class="content">
+      <input
+        type="text"
+        class="sp-input"
+
+      >
+      <!-- <button class="sp-btn" (click)="joinRoom()">Join!</button> -->
+    </div>
+  </div>
+}
 
 

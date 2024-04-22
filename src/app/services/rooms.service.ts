@@ -5,7 +5,9 @@ import { firstValueFrom } from "rxjs";
 import { UtilsService } from "./utils.service";
 import { Room, ServerRoomData } from "../classes/room";
 import { ServerVoterData, Voter } from "../classes/voter";
-import { WSHandler } from "./ws-handler";
+import { Store } from "@ngrx/store";
+import { setCachedRoomId, setRoom } from "../app-store/app.actions";
+import { AppState } from "../app-store/app.store";
 
 const SERVER = 'ws://localhost:3000'
 
@@ -14,98 +16,57 @@ const SERVER = 'ws://localhost:3000'
 })
 export class RoomsService {
 
-  id = '';
-  name: string = '';
-  ws: WebSocket | null = null;
-  roomId: string = '';
-  room: Room | null = null;
-
-  private router = inject(Router)
   private http = inject(HttpClient)
-  private utils = inject(UtilsService)
-  private wsHandler = inject(WSHandler)
+  private store = inject(Store<AppState>)
 
-  constructor() {
-    const storageName = localStorage.getItem('name');
-    const storageId = localStorage.getItem('id');
-    const storageRoomId = localStorage.getItem('roomId');
+  constructor() {}
 
-    if (storageName) {
-      this.name = storageName;
-    }
-    if (storageId) {
-      this.id = storageId;
-    } else {
-      this.id = this.utils.randString();
-      localStorage.setItem('id', this.id);
-    }
-
-    if (storageRoomId) {
-      this.roomId = storageRoomId;
-    }
-  }
-
-  createRoom(name: string) {
-    firstValueFrom(this.http.post('http://localhost:3000/room-create', JSON.stringify({
-      id: this.id,
+  // Returns roomId if successful
+  createRoom(id: string, name: string): Promise<string> {
+    return firstValueFrom<{ roomId: string }>(this.http.post<{ roomId: string }>('http://localhost:3000/room-create', JSON.stringify({
+      id,
       name,
-    }))).then((value: any) => {
-      this.name = name;
-      const roomId = value.roomId;
-      localStorage.setItem('roomId', roomId);
-      this.roomId = roomId;
-      this.ws = new WebSocket(
-        `${SERVER}/ws?room=${roomId}&id=${this.id}`
-      );
-      this.wsHandler.initListeners(this.ws);
-    });
+    }))).then(({ roomId }) => {
+      this.store.dispatch(setCachedRoomId({ cachedRoomId: roomId }))
+      return roomId;
+    })
   }
 
-  joinRoom(roomId: string, name: string) {
-    firstValueFrom<{ room: ServerRoomData }>(
+  // Returns full room if joined successful
+  joinRoom(id: string, roomId: string, name: string): Promise<ServerRoomData> {
+    return firstValueFrom<{ room: ServerRoomData }>(
       this.http.post<{ room: ServerRoomData }>('http://localhost:3000/room-join', JSON.stringify({
-        id: this.id,
+        id,
         name,
         roomId,
-    }))).then(({ room }) => {
-      this.roomId = roomId;
-      this.name = name;
-      this.id = this.id;
-      this.room = new Room(this.roomId, room.host);
-
-      const voters = Object.values(room.voters) || []
-      this.room.voters = voters.map((voter: ServerVoterData) => new Voter(voter))
-
-      localStorage.setItem('roomId', roomId);
-      this.ws = new WebSocket(
-        `${SERVER}/ws?room=${roomId}&id=${this.id}`
-      );
-      this.wsHandler.initListeners(this.ws)
-    });
+    })))
+    .then(({ room }) => {
+      return room;
+    })
   }
 
-  getRoomData(roomId: string) {
+  // Returns room data
+  getRoomData(roomId: string): Promise<ServerRoomData> {
     return firstValueFrom<{ room: ServerRoomData }>(this.http.post<{ room: ServerRoomData }>('http://localhost:3000/room-get', JSON.stringify({
       roomId
     })))
     .then(({ room }) => {
-      this.room = new Room(room.id, room.host);
-      this.room.revealed = room.revealed;
-      const voters: Voter[] = Object
-        .values(room.voters)
-        .sort((a: ServerVoterData) => a.isHost ? -1 : 1)
-        .map((voter) => new Voter(voter))
-      this.room.voters = voters;
-      if (!this.ws) {
-        this.ws = new WebSocket(
-          `${SERVER}/ws?room=${roomId}&id=${this.id}`
-        );
-        this.wsHandler.initListeners(this.ws);
-      }
+      return room;
     })
-    .catch((error) => {
-      this.router.navigate(['/'])
-      console.error(error);
-    });
+  }
+
+  setServerRoomData(serverRoom: ServerRoomData) {
+    const voters = (Object
+      .values(serverRoom.voters) || [])
+      .sort((a: ServerVoterData) => a.isHost ? -1 : 1)
+      .map((voter) => {
+        const v = new Voter(voter)
+        v.isHost = v.id === serverRoom.host
+        return v
+      });
+    const room = new Room(serverRoom.id, serverRoom.host);
+    room.revealed = serverRoom.revealed;
+    room.voters = voters;
+    this.store.dispatch(setRoom({ room }));
   }
 }
