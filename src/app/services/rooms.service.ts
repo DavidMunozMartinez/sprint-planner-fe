@@ -42,6 +42,7 @@ export class RoomsService {
         roomId,
     })))
     .then(({ room }) => {
+      this.store.dispatch(setCachedRoomId({ cachedRoomId: roomId }))
       return room;
     })
   }
