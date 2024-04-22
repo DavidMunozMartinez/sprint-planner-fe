@@ -4,7 +4,7 @@ import { VotingRoomComponent } from './components/voting-room/voting-room.compon
 
 export const routes: Routes = [
   {
-    title: 'Sprint planner yo',
+    title: 'Sprint planner',
     path: '',
     component: LandingPageComponent,
   },
