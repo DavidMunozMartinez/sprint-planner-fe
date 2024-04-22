@@ -1,7 +1,7 @@
 import { Injectable, inject } from "@angular/core";
 import { WSEventsHandler, WSMessage } from "./we-events-handler";
 import { Router } from "@angular/router";
-import { SERVER } from "../constants";
+import { PROD_WS } from "../constants";
 
 type WSEvent = {
   message: WSMessage;
@@ -25,7 +25,7 @@ export class WSHandler {
 
   init(userId: string, roomId: string) {
     this.ws = new WebSocket(
-      `${SERVER}/ws?room=${roomId}&id=${userId}`
+      `${PROD_WS}/ws?room=${roomId}&id=${userId}`
     );
 
     this.ws.addEventListener('message', (event) => {

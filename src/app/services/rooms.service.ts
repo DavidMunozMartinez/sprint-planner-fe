@@ -8,6 +8,7 @@ import { ServerVoterData, Voter } from "../classes/voter";
 import { Store } from "@ngrx/store";
 import { setCachedRoomId, setRoom } from "../app-store/app.actions";
 import { AppState } from "../app-store/app.store";
+import { PROD_API } from "../constants";
 
 const SERVER = 'ws://localhost:3000'
 
@@ -23,7 +24,7 @@ export class RoomsService {
 
   // Returns roomId if successful
   createRoom(id: string, name: string): Promise<string> {
-    return firstValueFrom<{ roomId: string }>(this.http.post<{ roomId: string }>('http://localhost:3000/room-create', JSON.stringify({
+    return firstValueFrom<{ roomId: string }>(this.http.post<{ roomId: string }>(PROD_API + '/room-create', JSON.stringify({
       id,
       name,
     }))).then(({ roomId }) => {
@@ -35,7 +36,7 @@ export class RoomsService {
   // Returns full room if joined successful
   joinRoom(id: string, roomId: string, name: string): Promise<ServerRoomData> {
     return firstValueFrom<{ room: ServerRoomData }>(
-      this.http.post<{ room: ServerRoomData }>('http://localhost:3000/room-join', JSON.stringify({
+      this.http.post<{ room: ServerRoomData }>(PROD_API + '/room-join', JSON.stringify({
         id,
         name,
         roomId,
@@ -47,7 +48,7 @@ export class RoomsService {
 
   // Returns room data
   getRoomData(roomId: string): Promise<ServerRoomData> {
-    return firstValueFrom<{ room: ServerRoomData }>(this.http.post<{ room: ServerRoomData }>('http://localhost:3000/room-get', JSON.stringify({
+    return firstValueFrom<{ room: ServerRoomData }>(this.http.post<{ room: ServerRoomData }>(PROD_API + '/room-get', JSON.stringify({
       roomId
     })))
     .then(({ room }) => {

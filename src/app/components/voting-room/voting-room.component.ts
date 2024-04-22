@@ -10,6 +10,7 @@ import { AppState } from "../../app-store/app.store";
 import { setVoterProp } from "../../app-store/app.actions";
 import { Router } from "@angular/router";
 import { ToasterInputs } from "../toaster/toaster.component";
+import { PROD_API } from "../../constants";
 
 
 
@@ -69,7 +70,7 @@ export class VotingRoomComponent {
     if (!me || room.revealed) return;
 
     firstValueFrom(
-      this.http.post('http://localhost:3000/update-vote', JSON.stringify({
+      this.http.post(PROD_API + '/update-vote', JSON.stringify({
         voterId: me.id,
         roomId: room.id,
         value,
@@ -81,7 +82,7 @@ export class VotingRoomComponent {
   revealVotes() {
     const room = this.room();
     firstValueFrom(
-      this.http.post('http://localhost:3000/reveal-votes', JSON.stringify({
+      this.http.post(PROD_API + '/reveal-votes', JSON.stringify({
         roomId: room.id,
     }))).then((data: any) => {
       
@@ -91,7 +92,7 @@ export class VotingRoomComponent {
   resetVotes() {
     const room = this.room();
     firstValueFrom(
-      this.http.post('http://localhost:3000/reset-votes', JSON.stringify({
+      this.http.post(PROD_API + '/reset-votes', JSON.stringify({
         roomId: room.id,
     }))).then((data: any) => {
     });
