@@ -5,6 +5,7 @@
       <h3>
         Id: {{ room().id }}
       </h3>
+      <button class="sp-btn" (click)="copyLink()">Copy Link</button>
     </div>
   </div>
   
@@ -47,12 +48,15 @@
       </div>
     </div>
   
-    @if(me()?.isHost) {
-      <div class="container">
-        <button (click)="resetVotes()" class="sp-btn">New vote</button>
-        <button (click)="revealVotes()" class="sp-btn">Reveal Votes</button>
+    <div class="container">
+        @if(me()?.isHost) {
+          <button (click)="resetVotes()" class="sp-btn">New vote</button>
+          <button (click)="revealVotes()" class="sp-btn">Reveal Votes</button>
+          <button (click)="closeRoom()" class="sp-btn">Close Room</button>
+        } @else {
+          <button (click)="leaveRoom()" class="sp-btn">Leave Room</button>
+        }
       </div>
-    }
   }
   <statistics-component [data]="room().revealed ? statisticsData() : []"/>
 </div>
@@ -67,7 +71,6 @@
         type="text"
         class="sp-input"
       >
-      <!-- <button class="sp-btn" (click)="joinRoom()">Join!</button> -->
     </div>
   </div>
 }

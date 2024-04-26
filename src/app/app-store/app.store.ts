@@ -1,6 +1,6 @@
 import { createReducer, on } from "@ngrx/store";
-import { addVoter, setCachedRoomId, setId, setName, setRoom, setRoomRevealed, setVoterProp } from "./app.actions";
-import { onAddVoter, onSetCachedRoomId, onSetId, onSetName, onSetRoom, onSetRoomRevealed, onSetVoterProp } from "./app.reducer";
+import { addVoter, deleteVoter, setCachedRoomId, setId, setName, setRoom, setRoomRevealed, setVoterProp } from "./app.actions";
+import { onAddVoter, onDeleteVoter, onSetCachedRoomId, onSetId, onSetName, onSetRoom, onSetRoomRevealed, onSetVoterProp } from "./app.reducer";
 import { Room, RoomState } from "../classes/room";
 import { Voter } from "../classes/voter";
 
@@ -39,5 +39,6 @@ export const appReducer = createReducer(
   on(setCachedRoomId, onSetCachedRoomId),
   on(setVoterProp<any>(), onSetVoterProp),
   on(addVoter, onAddVoter),
-  on(setRoomRevealed, onSetRoomRevealed)
+  on(setRoomRevealed, onSetRoomRevealed),
+  on(deleteVoter, onDeleteVoter),
 )

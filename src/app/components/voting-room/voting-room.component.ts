@@ -7,7 +7,7 @@ import { StatisticsComponent } from "../statistics-component/statistics.componen
 import { Store } from "@ngrx/store";
 import { selectCachedRoomId, selectId, selectName, selectRoom } from "../../app-store/app.selectors";
 import { AppState } from "../../app-store/app.store";
-import { setVoterProp } from "../../app-store/app.actions";
+import { setCachedRoomId, setVoterProp } from "../../app-store/app.actions";
 import { Router } from "@angular/router";
 import { ToasterInputs } from "../toaster/toaster.component";
 import { PROD_API } from "../../constants";
@@ -28,7 +28,6 @@ export class VotingRoomComponent {
   private http = inject(HttpClient);
   private store = inject(Store<AppState>)
   private router = inject(Router)
-  // private connected = false;
 
   options = [0.5, 1, 2, 3, 5, 8, 13, 21]
   name = this.store.selectSignal(selectName);
@@ -75,7 +74,8 @@ export class VotingRoomComponent {
         roomId: room.id,
         value,
     }))).then((data: any) => {
-      this.store.dispatch(setVoterProp<"vote">()({ id: me.id, property: "vote", value }))
+      const vote = value == me.vote ? -1 : value;
+      this.store.dispatch(setVoterProp<"vote">()({ id: me.id, property: "vote", value: vote }))
     });
   }
 
@@ -96,6 +96,33 @@ export class VotingRoomComponent {
         roomId: room.id,
     }))).then((data: any) => {
     });
+  }
+
+  closeRoom() {
+    const room = this.room();
+    firstValueFrom(
+      this.http.post(PROD_API + '/room-close', JSON.stringify({
+        roomId: room.id,
+    }))).then(() => {
+      this.router.navigate(['/'])
+    });
+  }
+
+  leaveRoom() {
+    const room = this.room();
+    firstValueFrom(
+      this.http.post(PROD_API + '/room-leave', JSON.stringify({
+        roomId: this.room().id,
+        voterId: this.me()?.id || "",
+    }))).then(() => {
+      this.store.dispatch(setCachedRoomId({ cachedRoomId: "" }))
+      this.router.navigate(['/']);
+    });
+  }
+
+  copyLink() {
+    const url = 'https://sprint-planner-fe.vercel.app?room=' + this.room().id;
+    navigator.clipboard.writeText(url);
   }
 
   private async handleAutoJoin(cachedRoomId: string, id: string) {

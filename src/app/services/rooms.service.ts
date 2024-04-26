@@ -57,6 +57,24 @@ export class RoomsService {
     })
   }
 
+  closeRoom(roomId: string) {
+    return firstValueFrom(this.http.post(PROD_API + '/room-delete', JSON.stringify({
+      roomId
+    })))
+    .then(() => {
+      // return room;
+    })
+  }
+
+  leaveRoom(roomId: string) {
+    return firstValueFrom(this.http.post(PROD_API + '/room-leave', JSON.stringify({
+      roomId
+    })))
+    .then(() => {
+      // return room;
+    })
+  }
+
   setServerRoomData(serverRoom: ServerRoomData) {
     const voters = (Object
       .values(serverRoom.voters) || [])

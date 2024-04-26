@@ -4,7 +4,7 @@ import { Store } from "@ngrx/store";
 import { AppState } from "../app-store/app.store";
 import { selectRoom } from "../app-store/app.selectors";
 import { Room } from "../classes/room";
-import { addVoter, setRoomRevealed, setVoterProp } from "../app-store/app.actions";
+import { addVoter, deleteVoter, setRoomRevealed, setVoterProp } from "../app-store/app.actions";
 
 export type VoterJoinedWSData = {
   voter: ServerVoterData
@@ -19,6 +19,11 @@ export type VoterUpdatedWSData = {
 export type VotesRevelatedWSData = {
   votes: { [key: string]: number }
 }
+
+export type VoterLeaveWSData = {
+  voterId: string;
+}
+
 export type WSMessage = VoterJoinedWSData & VoterUpdatedWSData & VotesRevelatedWSData
 
 @Injectable({
@@ -62,4 +67,10 @@ export class WSEventsHandler {
       this.store.dispatch(setVoterProp<"hasVoted">()({ id: voter.id, property: "hasVoted", value: false }))
     });
   }
+
+  voterLeave(data: VoterLeaveWSData) {
+    this.store.dispatch(deleteVoter({ voterId: data.voterId }))
+  }
+
+  roomClosed() {}
 }

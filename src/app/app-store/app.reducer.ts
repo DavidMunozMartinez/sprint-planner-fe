@@ -1,5 +1,5 @@
 import { ActionType} from "@ngrx/store";
-import { addVoter, setCachedRoomId, setId, setName, setRoom, setRoomRevealed, setVoterProp } from "./app.actions";
+import { addVoter, deleteVoter, setCachedRoomId, setId, setName, setRoom, setRoomRevealed, setVoterProp } from "./app.actions";
 import { AppState } from "./app.store";
 import { Room } from "../classes/room";
 import { Voter } from "../classes/voter";
@@ -62,4 +62,12 @@ export function onSetRoomRevealed(state: AppState, action: ActionType<typeof set
       revealed: action.revealed,
     }
   }
+}
+
+export function onDeleteVoter(state: AppState, action: ActionType<typeof deleteVoter>): AppState {
+  const stateCopy: AppState = JSON.parse(JSON.stringify(state));
+  const index = stateCopy.ROOM.voters.findIndex((voter) => voter.id === action.voterId);
+  stateCopy.ROOM.voters.splice(index, 1);
+  // stateCopy.ROOM.voters = voters;
+  return stateCopy;
 }

@@ -15,3 +15,5 @@ export const setVoterProp = <T extends keyof Voter>() => {
 export const addVoter = createAction('AddVoter', props<{ voter: Voter }>());
 
 export const setRoomRevealed = createAction('SetRoomRevealed', props<{ revealed: boolean }>());
+
+export const deleteVoter = createAction('DeleteVoter', props<{ voterId: string }>());
