@@ -6,6 +6,7 @@
   color: white;
   transition: background-color 120ms ease-in-out;
   cursor: pointer;
+  position: relative;
 }
 .sp-btn:focus {
   background: var(--primary-tint);
@@ -20,11 +21,7 @@
 .sp-btn.secondary {
   border-radius: 4px;
   background: var(--background);
-  // border:2px solid var(--primary);
-  // box-shadow: ;
   box-shadow: 0px 0px 0px 2px var(--primary);
-
-  // border-style: inset;
   padding: 8px 16px;
   margin: 4px;
   color: var(--primary);

@@ -9,17 +9,14 @@ import { selectCachedRoomId, selectId, selectName, selectRoom } from "../../app-
 import { AppState } from "../../app-store/app.store";
 import { setCachedRoomId, setVoterProp } from "../../app-store/app.actions";
 import { Router } from "@angular/router";
-import { ToasterInputs } from "../toaster/toaster.component";
+import { ToasterComponent, ToasterInputs } from "../toaster/toaster.component";
 import { PROD_API } from "../../constants";
-
-
-
 @Component({
   selector: 'voting-room',
   templateUrl: './voting-room.component.html',
   styleUrls: ['./voting-room.component.scss'],
   standalone: true,
-  imports: [StatisticsComponent]
+  imports: [StatisticsComponent, ToasterComponent]
 })
 export class VotingRoomComponent {
 
@@ -45,6 +42,12 @@ export class VotingRoomComponent {
       value: voter.vote
     }
   }));
+
+  timerValue = signal(5);
+  timerProgress = signal(0);
+  progressPercent = computed(() => (this.timerProgress() > 0 ? (this.timerProgress() / this.timerValue()) * 90 : 90) + '%')
+
+  currentTimer = null;
 
   toasters: ToasterInputs[] = []
   
@@ -85,7 +88,11 @@ export class VotingRoomComponent {
       this.http.post(PROD_API + '/reveal-votes', JSON.stringify({
         roomId: room.id,
     }))).then((data: any) => {
-      
+      // this.toasters.push({
+      //   text: 'test',
+      //   type: 'primary',
+      //   position: 'bottom'
+      // })
     });
   }
 
@@ -123,6 +130,30 @@ export class VotingRoomComponent {
   copyLink() {
     const url = 'https://sprint-planner-fe.vercel.app?room=' + this.room().id;
     navigator.clipboard.writeText(url);
+  }
+
+  setTimer(event: Event) {
+    const value = (event.target as HTMLSelectElement).value;
+    this.timerValue.set(parseInt(value));
+  }
+
+  startTimer() {
+    let timer = this.timerValue();
+    this.timerProgress.set(timer);
+
+    const update = (() => {
+      setTimeout(() => {
+        timer--
+        this.timerProgress.set(timer);
+        if (timer > 0) {
+          update();
+        } else {
+          this.revealVotes()
+        }
+      }, 1000);
+    })
+
+    update();
   }
 
   private async handleAutoJoin(cachedRoomId: string, id: string) {
