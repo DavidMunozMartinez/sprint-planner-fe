@@ -5,6 +5,7 @@ import { AppState } from "../app-store/app.store";
 import { selectRoom } from "../app-store/app.selectors";
 import { Room, RoomTimer } from "../classes/room";
 import { addVoter, deleteVoter, setRoomRevealed, setRoomTimer, setVoterProp } from "../app-store/app.actions";
+import { Router } from "@angular/router";
 
 export type VoterJoinedWSData = {
   voter: ServerVoterData
@@ -36,6 +37,7 @@ export type WSMessage = VoterJoinedWSData & VoterUpdatedWSData & VotesRevelatedW
 export class WSEventsHandler {
 
   private store = inject(Store<AppState>)
+  private router = inject(Router)
 
   private room$ = this.store.select(selectRoom);
   private room: Room | null = null;
@@ -80,5 +82,7 @@ export class WSEventsHandler {
     this.store.dispatch(setRoomTimer({ timer }))
   }
 
-  roomClosed() {}
+  roomClosed() {
+    this.router.navigate(['/'])
+  }
 }
