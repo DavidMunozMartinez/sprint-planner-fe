@@ -13,7 +13,7 @@
   </div>
   
   <div class="container">
-    @for (voter of room().voters; track $index) {
+    @for (voter of room().voters; track voter.id; let i = $index) {
       <div
         class="container v-center voter-card"
         [class.voted]="voter.hasVoted"
@@ -27,7 +27,10 @@
             @if (voter.vote > 0) {
               {{ voter.vote }}
             } @else {
-              <img src="assets/no-vote.gif" height="35px" width="35px">
+              <picture>
+                <source [srcset]="'https://fonts.gstatic.com/s/e/notoemoji/latest/' + votersDisplay()[i] + '/512.webp'" type="image/webp">
+                <img [src]="'https://fonts.gstatic.com/s/e/notoemoji/latest/' + votersDisplay()[i] + '/512.gif'" alt="🫥" width="32" height="32">
+              </picture>
             }
           </div>
           }
@@ -38,7 +41,7 @@
   @if(me()) {
     <div class="container v-center">
       <div>
-        <h2>Vote</h2>
+        <h2>Vote: </h2>
       </div>
       <div>
         @for (val of options; track $index) {
@@ -65,11 +68,8 @@
                 <option value="10">10 sec</option>
                 <option value="15">15 sec</option>
                 <option value="30">30 sec</option>
-                <option value="30">1 min</option>
+                <option value="60">1 min</option>
               </select>
-              @if(timerRunning()) {
-                <div class="progress" [style.width]="progressPercent()"></div>
-              }
             </div>
           </span>
         } @else {
@@ -77,6 +77,13 @@
         }
       </div>
   }
+
+  @if (room().timer.current > 0) {
+    <div class="full-screen-modal transparent">
+      <h1 style="font-size: 96px;"> {{timerProgress()}} </h1>
+    </div>
+  }
+
   <statistics-component [data]="room().revealed ? statisticsData() : []"/>
 </div>
 
@@ -90,6 +97,18 @@
         type="text"
         class="sp-input"
       >
+    </div>
+  </div>
+}
+
+@if(fullScreenEmoji() != null) {
+  <div class="full-screen-modal transparent temp">
+    <div class="content">
+      <h1>{{fullScreenEmoji()?.title}}</h1>
+      <picture>
+        <source [srcset]="'https://fonts.gstatic.com/s/e/notoemoji/latest/' + fullScreenEmoji()?.emoji + '/512.webp'" type="image/webp">
+        <img [src]="'https://fonts.gstatic.com/s/e/notoemoji/latest/' + fullScreenEmoji()?.emoji + '/512.gif'" width="124" height="124">
+      </picture>
     </div>
   </div>
 }

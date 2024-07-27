@@ -1,5 +1,5 @@
 import { KeyValuePipe } from "@angular/common";
-import { Component, computed, input } from "@angular/core";
+import { Component, computed, input, output } from "@angular/core";
 
 type Data = {
   name: string,

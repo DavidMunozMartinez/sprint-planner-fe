@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from "@angular/core";
+import { Component, computed, effect, inject, signal, viewChild } from "@angular/core";
 import { RoomsService } from "../../services/rooms.service";
 import { WSHandler } from "../../services/ws-handler";
 import { firstValueFrom } from "rxjs";
@@ -16,7 +16,7 @@ import { PROD_API } from "../../constants";
   templateUrl: './voting-room.component.html',
   styleUrls: ['./voting-room.component.scss'],
   standalone: true,
-  imports: [StatisticsComponent, ToasterComponent]
+  imports: [StatisticsComponent, ToasterComponent],
 })
 export class VotingRoomComponent {
 
@@ -25,6 +25,19 @@ export class VotingRoomComponent {
   private http = inject(HttpClient);
   private store = inject(Store<AppState>)
   private router = inject(Router)
+
+  private statsComponent = viewChild<StatisticsComponent>(StatisticsComponent);
+
+  private emojis = [
+    '1fae5',
+    '1f910',
+    '1fae3',
+    '1f636_200d_1f32b_fe0f',
+    '1f636',
+    '1fae2'
+  ];
+
+  private timerClicked = false;
 
   options = [0.5, 1, 2, 3, 5, 8, 13, 21]
   name = this.store.selectSignal(selectName);
@@ -47,17 +60,50 @@ export class VotingRoomComponent {
   timerProgress = this.store.selectSignal(selectRoomTimerCurrent);
   timerRunning = this.store.selectSignal(selectRoomTimerRunning);
 
-  progressPercent = computed(() => (this.timerProgress() > 0 ? (this.timerProgress() / this.timerValue()) * 90 : 90) + '%')
+  frequencies = computed(() => {
+    const stats = this.statsComponent();
+    const frequencies = stats?.frequencies();
+    return Object.values(frequencies || {}).length
+  });
 
-  currentTimer = null;
+  fullScreenEmoji = computed(() => {
+    const room = this.room();
+    if (!room.revealed) {
+      return null;
+    }
+    const agreement = room.voters.length > 0 && room.voters
+      .every((voter, _, voters) => voter.vote === voters[0].vote && voter.vote > 0)
+    
+    if (agreement) {
+      // Party emoji
+      return {
+        emoji: '1f973',
+        title: 'Full team agreement'
+      }
+    }
 
-  toasters: ToasterInputs[] = []
-  
+    if (this.frequencies() > 3) {
+      return {
+        emoji: '1f615',
+        title: ''
+      }
+    }
+
+    return null;
+
+  });
+
+  votersDisplay = computed(() => {
+    return this.room().voters.map((voter) => {
+      const emoji = this.emojis[Math.floor(Math.random() * this.emojis.length)];
+      return voter.vote > 0 ? voter.vote : emoji
+    })
+  })
+
   constructor() {
     this.wsHandler.on('timerUpdate', ({timer}) => {
-      console.log(timer);
-      if (timer.current === 0) {
-
+      if (timer.current <= 0) {
+        this.timerClicked = false;
         this.revealVotes();
       }
     })
@@ -94,15 +140,13 @@ export class VotingRoomComponent {
 
   revealVotes() {
     const room = this.room();
+    if (room.revealed) {
+      return;
+    }
     firstValueFrom(
       this.http.post(PROD_API + '/reveal-votes', JSON.stringify({
         roomId: room.id,
     }))).then((data: any) => {
-      // this.toasters.push({
-      //   text: 'test',
-      //   type: 'primary',
-      //   position: 'bottom'
-      // })
     });
   }
 
@@ -148,17 +192,17 @@ export class VotingRoomComponent {
   }
 
   startTimer() {
-    if (this.timerRunning()) {
+    if (this.timerRunning() || this.timerClicked) {
       return;
     }
 
+    this.timerClicked = true;
     const timer = {
       time: this.timerValue(),
       current: this.timerValue(),
       running: true,
     };
 
-    this.store.dispatch(setRoomTimer({ timer }))
     this.roomsService.startRoomTimer(this.room().id, timer);
   }
 

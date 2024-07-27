@@ -32,6 +32,8 @@ button, input, select {
   position: absolute;
   height: 100%;
   width: 100%;
+  left: 0;
+  top: 0;
 }
 
 .h-center {
@@ -46,9 +48,16 @@ button, input, select {
   position: fixed;
   height: 100%;
   width: 100%;
+  left: 0;
+  top: 0;
   display: flex;
   justify-content: center;
   align-items: center;
   background: white;
   flex-direction: column;
+
+  &.transparent {
+    background: none;
+    pointer-events: none;
+  }
 }
