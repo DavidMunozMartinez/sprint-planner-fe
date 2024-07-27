@@ -1,5 +1,5 @@
 import { Injectable, inject } from "@angular/core";
-import { WSEventsHandler, WSMessage } from "./we-events-handler";
+import { WSEventsHandler, WSMessage } from "./ws-events-handler";
 import { Router } from "@angular/router";
 import { PROD_WS } from "../constants";
 
