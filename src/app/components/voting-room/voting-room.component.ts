@@ -1,13 +1,13 @@
-import { Component, computed, inject, signal } from "@angular/core";
+import { Component, computed, effect, inject, signal } from "@angular/core";
 import { RoomsService } from "../../services/rooms.service";
 import { WSHandler } from "../../services/ws-handler";
 import { firstValueFrom } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { StatisticsComponent } from "../statistics-component/statistics.component";
 import { Store } from "@ngrx/store";
-import { selectCachedRoomId, selectId, selectName, selectRoom } from "../../app-store/app.selectors";
+import { selectCachedRoomId, selectId, selectName, selectRoom, selectRoomTimerCurrent, selectRoomTimerRunning, selectRoomTimerValue } from "../../app-store/app.selectors";
 import { AppState } from "../../app-store/app.store";
-import { setCachedRoomId, setVoterProp } from "../../app-store/app.actions";
+import { setCachedRoomId, setRoomTimer, setVoterProp } from "../../app-store/app.actions";
 import { Router } from "@angular/router";
 import { ToasterComponent, ToasterInputs } from "../toaster/toaster.component";
 import { PROD_API } from "../../constants";
@@ -44,14 +44,24 @@ export class VotingRoomComponent {
   }));
 
   timerValue = signal(5);
-  timerProgress = signal(0);
+  timerProgress = this.store.selectSignal(selectRoomTimerCurrent);
+  timerRunning = this.store.selectSignal(selectRoomTimerRunning);
+
   progressPercent = computed(() => (this.timerProgress() > 0 ? (this.timerProgress() / this.timerValue()) * 90 : 90) + '%')
 
   currentTimer = null;
 
   toasters: ToasterInputs[] = []
   
-  constructor() {}
+  constructor() {
+    this.wsHandler.on('timerUpdate', ({timer}) => {
+      console.log(timer);
+      if (timer.current === 0) {
+
+        this.revealVotes();
+      }
+    })
+  }
 
   async ngOnInit() {
     const cachedRoomId = this.store.selectSignal(selectCachedRoomId)();
@@ -138,22 +148,18 @@ export class VotingRoomComponent {
   }
 
   startTimer() {
-    let timer = this.timerValue();
-    this.timerProgress.set(timer);
+    if (this.timerRunning()) {
+      return;
+    }
 
-    const update = (() => {
-      setTimeout(() => {
-        timer--
-        this.timerProgress.set(timer);
-        if (timer > 0) {
-          update();
-        } else {
-          this.revealVotes()
-        }
-      }, 1000);
-    })
+    const timer = {
+      time: this.timerValue(),
+      current: this.timerValue(),
+      running: true,
+    };
 
-    update();
+    this.store.dispatch(setRoomTimer({ timer }))
+    this.roomsService.startRoomTimer(this.room().id, timer);
   }
 
   private async handleAutoJoin(cachedRoomId: string, id: string) {

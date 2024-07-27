@@ -3,7 +3,7 @@ import { Injectable, inject } from "@angular/core";
 import { Router } from "@angular/router";
 import { firstValueFrom } from "rxjs";
 import { UtilsService } from "./utils.service";
-import { Room, ServerRoomData } from "../classes/room";
+import { Room, RoomTimer, ServerRoomData } from "../classes/room";
 import { ServerVoterData, Voter } from "../classes/voter";
 import { Store } from "@ngrx/store";
 import { setCachedRoomId, setRoom } from "../app-store/app.actions";
@@ -88,5 +88,14 @@ export class RoomsService {
     room.revealed = serverRoom.revealed;
     room.voters = voters;
     this.store.dispatch(setRoom({ room }));
+  }
+
+  startRoomTimer(roomId: string, timer: RoomTimer) {
+    return firstValueFrom(
+      this.http.post(PROD_API + '/room-timer', JSON.stringify({ roomId, timer}))
+    )
+    .then(() => {
+      // 
+    })
   }
 }

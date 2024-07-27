@@ -32,9 +32,9 @@
 .progress {
   position: absolute;
   left: 5%;
-  height: 8px;
+  height: 4px;
   border-radius: 4px;
-  bottom: 0;
+  bottom: 4px;
   background-color: var(--primary);
-  transition: width 500ms ease-out;
+  transition: width 300ms ease-out;
 }

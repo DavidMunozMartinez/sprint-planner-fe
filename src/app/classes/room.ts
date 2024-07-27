@@ -5,6 +5,7 @@ export type RoomState = {
   host: string,
   voters: Voter[],
   revealed: boolean
+  timer: RoomTimer
 }
 
 export class Room {
@@ -12,6 +13,11 @@ export class Room {
   host: string = '';
   voters: Voter[] = [];
   revealed: boolean = false;
+  timer: RoomTimer = {
+    time: -1,
+    current: -1,
+    running: false,
+  }
 
   constructor(id: string, host: string) {
     this.id = id;
@@ -24,4 +30,10 @@ export type ServerRoomData = {
   host: string;
   voters: { [key: string]: ServerVoterData }
   revealed: boolean;
+}
+
+export type RoomTimer = {
+  time: number,
+  current: number,
+  running: boolean,
 }

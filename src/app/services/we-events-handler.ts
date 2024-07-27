@@ -3,8 +3,8 @@ import { ServerVoterData, Voter } from "../classes/voter";
 import { Store } from "@ngrx/store";
 import { AppState } from "../app-store/app.store";
 import { selectRoom } from "../app-store/app.selectors";
-import { Room } from "../classes/room";
-import { addVoter, deleteVoter, setRoomRevealed, setVoterProp } from "../app-store/app.actions";
+import { Room, RoomTimer } from "../classes/room";
+import { addVoter, deleteVoter, setRoomRevealed, setRoomTimer, setVoterProp } from "../app-store/app.actions";
 
 export type VoterJoinedWSData = {
   voter: ServerVoterData
@@ -24,7 +24,11 @@ export type VoterLeaveWSData = {
   voterId: string;
 }
 
-export type WSMessage = VoterJoinedWSData & VoterUpdatedWSData & VotesRevelatedWSData
+export type TimerUpdateWSData = {
+  timer: RoomTimer
+}
+
+export type WSMessage = VoterJoinedWSData & VoterUpdatedWSData & VotesRevelatedWSData & TimerUpdateWSData
 
 @Injectable({
   providedIn: 'root'
@@ -70,6 +74,10 @@ export class WSEventsHandler {
 
   voterLeave(data: VoterLeaveWSData) {
     this.store.dispatch(deleteVoter({ voterId: data.voterId }))
+  }
+
+  timerUpdate({ timer }: TimerUpdateWSData ) {
+    this.store.dispatch(setRoomTimer({ timer }))
   }
 
   roomClosed() {}

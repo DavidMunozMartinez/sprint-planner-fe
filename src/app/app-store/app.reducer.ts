@@ -1,5 +1,5 @@
 import { ActionType} from "@ngrx/store";
-import { addVoter, deleteVoter, setCachedRoomId, setId, setName, setRoom, setRoomRevealed, setVoterProp } from "./app.actions";
+import { addVoter, deleteVoter, setCachedRoomId, setId, setName, setRoom, setRoomRevealed, setRoomTimer, setVoterProp } from "./app.actions";
 import { AppState } from "./app.store";
 import { Room } from "../classes/room";
 import { Voter } from "../classes/voter";
@@ -70,4 +70,14 @@ export function onDeleteVoter(state: AppState, action: ActionType<typeof deleteV
   stateCopy.ROOM.voters.splice(index, 1);
   // stateCopy.ROOM.voters = voters;
   return stateCopy;
+}
+
+export function onSetRoomTimer(state: AppState, action: ActionType<typeof setRoomTimer>): AppState {
+  return {
+    ...state,
+    ROOM: {
+      ...state.ROOM,
+      timer: action.timer,
+    }
+  };
 }

@@ -6,6 +6,9 @@
         Id: {{ room().id }}
       </h3>
       <button class="sp-btn" (click)="copyLink()">Copy Link</button>
+      @if(me()?.isHost) {
+        <button (click)="closeRoom()" class="sp-btn">Close Room</button>
+      }
     </div>
   </div>
   
@@ -52,20 +55,21 @@
         @if(me()?.isHost) {
           <button (click)="resetVotes()" class="sp-btn">New vote</button>
           <button (click)="revealVotes()" class="sp-btn">Reveal Votes</button>
-          <button (click)="closeRoom()" class="sp-btn">Close Room</button>
           <span>
             <div class="sp-btn secondary">
               <button (click)="startTimer()" class="sp-btn">
                 Start Timer
               </button>
-              <select class="sp-input" (change)="setTimer($event)">
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="15">15</option>
-                <option value="15">30</option>
+              <select class="sp-btn secondary" (change)="setTimer($event)">
+                <option value="5">5 sec</option>
+                <option value="10">10 sec</option>
+                <option value="15">15 sec</option>
+                <option value="30">30 sec</option>
+                <option value="30">1 min</option>
               </select>
-              <div class="progress" [style.width]="progressPercent()">
-              </div>
+              @if(timerRunning()) {
+                <div class="progress" [style.width]="progressPercent()"></div>
+              }
             </div>
           </span>
         } @else {
