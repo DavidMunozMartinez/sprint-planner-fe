@@ -7,7 +7,8 @@
       </h3>
       <button class="sp-btn" (click)="copyLink()">
         <i class="iconoir-copy"></i>
-        Copy Link</button>
+        Copy Link
+      </button>
       @if(me()?.isHost) {
         <button (click)="closeRoom()" class="sp-btn">Close Room</button>
       }
@@ -59,15 +60,19 @@
     <div class="container">
         @if(me()?.isHost) {
           <button (click)="resetVotes()" class="sp-btn">
-            <i class="iconoir-refresh"></i>
-            New vote
+            <span class="btn-content">
+              <i class="iconoir-refresh"></i>
+              New vote
+            </span>
           </button>
           <button (click)="revealVotes()" class="sp-btn">Reveal Votes</button>
           <span>
             <div class="sp-btn secondary">
               <button (click)="startTimer()" class="sp-btn">
                 <i class="iconoir-timer"></i>
-                Start Timer
+                <span>
+                  Start Timer
+                </span>
               </button>
               <select class="sp-btn secondary" (change)="setTimer($event)">
                 <option value="5">5 sec</option>

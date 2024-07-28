@@ -7,6 +7,13 @@
   transition: background-color 120ms ease-in-out;
   cursor: pointer;
   position: relative;
+
+  .btn-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
 }
 .sp-btn:focus {
   background: var(--primary-tint);
