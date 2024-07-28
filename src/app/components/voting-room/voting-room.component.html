@@ -5,7 +5,9 @@
       <h3>
         Id: {{ room().id }}
       </h3>
-      <button class="sp-btn" (click)="copyLink()">Copy Link</button>
+      <button class="sp-btn" (click)="copyLink()">
+        <i class="iconoir-copy"></i>
+        Copy Link</button>
       @if(me()?.isHost) {
         <button (click)="closeRoom()" class="sp-btn">Close Room</button>
       }
@@ -56,11 +58,15 @@
   
     <div class="container">
         @if(me()?.isHost) {
-          <button (click)="resetVotes()" class="sp-btn">New vote</button>
+          <button (click)="resetVotes()" class="sp-btn">
+            <i class="iconoir-refresh"></i>
+            New vote
+          </button>
           <button (click)="revealVotes()" class="sp-btn">Reveal Votes</button>
           <span>
             <div class="sp-btn secondary">
               <button (click)="startTimer()" class="sp-btn">
+                <i class="iconoir-timer"></i>
                 Start Timer
               </button>
               <select class="sp-btn secondary" (change)="setTimer($event)">
